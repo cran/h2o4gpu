@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Navdeep Gill, Erin LeDell, Yuan Tang" />
+
+<meta name="date" content="2018-03-23" />
+
+<title>H2O4GPU: Machine Learning with GPUs in R</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">H2O4GPU: Machine Learning with GPUs in R</h1>
+<h4 class="author"><em>Navdeep Gill, Erin LeDell, Yuan Tang</em></h4>
+<h4 class="date"><em>2018-03-23</em></h4>
+
+
+
+<p><strong>H2O4GPU</strong> is a collection of GPU solvers by <a href="https://www.h2o.ai/">H2O.ai</a> with APIs in Python and R. The Python API builds upon the easy-to-use <a href="http://scikit-learn.org">scikit-learn</a> API and its well-tested CPU-based algorithms. The <strong>h2o4gpu</strong> R package is a wrapper around the <strong>h2o4gpu</strong> Python package, and the interface follows standard R conventions for modeling.</p>
+<p>The R package makes use of RStudio’s <a href="https://rstudio.github.io/reticulate/">reticulate</a> package for facilitating access to Python libraries through R. Reticulate embeds a Python session within your R session, enabling seamless, high-performance interoperability.</p>
+<p><strong>H2O4GPU</strong> is a new project under active development and we are looking for contributors! If you find a bug, please check that we have not already fixed the issue in the bleeding edge version and then check that we do not already have an issue opened for this topic. If not, then please file a new issue with a reproducible example.</p>
+<ul>
+<li>Here is the main <a href="https://github.com/h2oai/h2o4gpu">GitHub repo</a>. If you like the package, please 🌟 the repo on GitHub!</li>
+<li>If you’re looking to contribute, check out the <a href="https://github.com/h2oai/h2o4gpu/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a> file.</li>
+<li>All open issues that are specific to the R package are <a href="https://github.com/h2oai/h2o4gpu/labels/R">here</a>.</li>
+<li>All open issues are <a href="https://github.com/h2oai/h2o4gpu/issues?utf8=%E2%9C%93&amp;q=is%3Aopen">here</a>.</li>
+</ul>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>The Python package is a prerequisite for the R package. So first, follow the instructions <a href="https://github.com/h2oai/h2o4gpu#installation">here</a> to install the <strong>h2o4gpu</strong> Python package (either at the system level or in a Python virtual envivonment). The easiest thing to do is to <code>pip install</code> either the stable or bleeding edge <code>whl</code> file. To ensure compatibility, the Python package version number should match the R package version number.</p>
+<p>The R package can be installed from CRAN using <code>install.packages(&quot;h2o4gpu&quot;)</code>. To install the development version of the <strong>h2o4gpu</strong> R package, you can install directly from GitHub as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(devtools)
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;h2oai/h2o4gpu&quot;</span>, <span class="dt">subdir =</span> <span class="st">&quot;src/interface_r&quot;</span>)</code></pre></div>
+<p>If the Python package was installed into a virtual environment, you may have to add thesse two lines of code to the top of your script. The path you will use will be the path of your virtual environment:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(reticulate)
+<span class="kw">use_virtualenv</span>(<span class="st">&quot;/home/ledell/venv/h2o4gpu&quot;</span>)  <span class="co"># set this to the path of your venv</span></code></pre></div>
+<p>However, if you installed the <strong>h2o4gpu</strong> Python package into the main Python installation on your machine, then these two lines of code will not be neccessary.</p>
+</div>
+<div id="quickstart" class="section level2">
+<h2>Quickstart</h2>
+<p>Here’s a quick demo of how to train and evaluate a GPU-based Random Forest classifier model. We will use the classic Iris dataset, which is a three-class classification problem and evaluate the performance of the model using classification error.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(h2o4gpu)
+<span class="kw">library</span>(reticulate)  <span class="co"># only needed if using a virtual Python environment</span>
+<span class="kw">use_virtualenv</span>(<span class="st">&quot;/home/ledell/venv/h2o4gpu&quot;</span>)  <span class="co"># set this to the path of your venv</span>
+
+<span class="co"># Prepare data</span>
+x &lt;-<span class="st"> </span>iris[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>]
+y &lt;-<span class="st"> </span><span class="kw">as.integer</span>(iris<span class="op">$</span>Species) <span class="co"># all columns, including the response, must be numeric</span>
+
+<span class="co"># Initialize and train the classifier</span>
+model &lt;-<span class="st"> </span><span class="kw">h2o4gpu.random_forest_classifier</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x, y)
+
+<span class="co"># Make predictions</span>
+pred &lt;-<span class="st"> </span>model <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x)
+
+<span class="co"># Compute classification error using the Metrics package (note this is training error)</span>
+<span class="kw">library</span>(Metrics)
+<span class="kw">ce</span>(<span class="dt">actual =</span> y, <span class="dt">predicted =</span> pred)</code></pre></div>
+</div>
+<div id="supervised-learning" class="section level2">
+<h2>Supervised Learning</h2>
+<p><strong>H2O4GPU</strong> contains a collection of popular algorithms for supervised learning: Random Forest, Gradient Boosting Machine (GBM) and Generalized Linear Models (GLMs) with Elastic Net regularization. There are methods for regression and classification for each of these algorithms. Both Random Forest and GBM support multiclass clasification, however the GLM currently only supports binomial classification (a ticket for multinomial support is open <a href="https://github.com/h2oai/h2o4gpu/issues/505">here</a>).</p>
+<p>The tree based models (Random Forest and GBM) are built on top of the very powerful <a href="https://xgboost.readthedocs.io/en/latest/">XGBoost</a> library, and the Elastic Net GLM has been built upon the POGS solver. <a href="http://stanford.edu/%7Eboyd/papers/pogs.html">Proximal Graph Solver (POGS)</a> is a solver for convex optimization problems in graph form using Alternating Direction Method of Multipliers (ADMM). We have found that this method is not as fast as we’d like it to be, so we are working on implementing an entirely new GLM from scratch (follow progress <a href="https://github.com/h2oai/h2o4gpu/issues/356">here</a>).</p>
+<p>The <strong>h2o4gpu</strong> R package does not include a suite of internal model metrics functions, therefore we encourage users to use a third-party model metrics package of their choice. For all the examples below, we will use the <a href="https://CRAN.R-project.org/package=Metrics">Metrics</a> R package. This package has a large number of model metrics functions, all with a very simple, unified API.</p>
+<div id="binary-classification" class="section level3">
+<h3>Binary Classification</h3>
+<p>In this example, we will train and test three different models on a subset of the <a href="https://archive.ics.uci.edu/ml/datasets/HIGGS">HIGGS</a> dataset. The goal in this dataset is to distinguish between signal “1” and background “0”, so this is a binary classification problem. The features are all numeric.</p>
+<p><strong>H2O4GPU</strong> requires all feature and response columns to be numeric, so in this case, we don’t have to do any pre-processing of the data. If your response column is a factor, then you can simply convert the levels to integer values using <code>as.integer()</code>. If you have categorical/factor columns among your features, you must apply an encoding method to convert the columns into numeric data. Some options are label encoding (simply convert the levels to integers) or one hot encoding (binary indicator columns, one for each categorical level). For simplicity, in this tutorial, we will always use label encoding, however you can read more about different types of encodings <a href="https://dzone.com/articles/handling-character-data-for-machine-learning">here</a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load a sample dataset for binary classification</span>
+<span class="co"># Source: https://archive.ics.uci.edu/ml/datasets/HIGGS</span>
+train &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://s3.amazonaws.com/erin-data/higgs/higgs_train_10k.csv&quot;</span>)
+test &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv&quot;</span>)
+
+<span class="co"># Create train &amp; test sets (column 1 is the response)</span>
+x_train &lt;-<span class="st"> </span>train[, <span class="op">-</span><span class="dv">1</span>]
+y_train &lt;-<span class="st"> </span>train[, <span class="dv">1</span>]
+x_test &lt;-<span class="st"> </span>test[, <span class="op">-</span><span class="dv">1</span>]
+y_test &lt;-<span class="st"> </span>test[, <span class="dv">1</span>]</code></pre></div>
+<p>Below we see that the <strong>h2o4gpu</strong> modeling functions follow a two-phased functional apporach. The two phased approach to modeling (first initialize model, then train) is more common in Python, and we borrow that paradigm here. We blend this with the the functional pipe syntax in R.</p>
+<p>First you define the model with it’s hyperparameters, for example, <code>h2o4gpu.gradient_boosting_classifier(n_estimators = 500, subsample = 0.8)</code>. Then we pipe the initialized model object to the <code>fit(x, y)</code> function to train the model, and save the resulting object.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Train three different binary classification models</span>
+model_gbc &lt;-<span class="st"> </span><span class="kw">h2o4gpu.gradient_boosting_classifier</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x_train, y_train)
+model_rfc &lt;-<span class="st"> </span><span class="kw">h2o4gpu.random_forest_classifier</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x_train, y_train)
+model_enc &lt;-<span class="st"> </span><span class="kw">h2o4gpu.elastic_net_classifier</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x_train, y_train) </code></pre></div>
+<p>We pipe our trained models to the familiar <code>predict()</code> method. In binary classification, we are often more interested in the numeric predicted values, rather than the predicted class labels. We follow the same design as the <code>predict()</code> function in the popular <strong>caret</strong> package, which allows the user to specify which type of predictions they want to return using the <code>type</code> argument. This defaults to <code>&quot;raw&quot;</code> which in classification, yields predicted class labels. When we set it to <code>&quot;prob&quot;</code>, it returns the (uncalibrated) class probabilities. This is not mentioned often in modeling software documentation, but you should note that despite using the term “probabilities”, these predicted values do not represent actual probabilities unless some method like <a href="https://en.wikipedia.org/wiki/Platt_scaling">Platt scaling</a> is used for calibration. This is true for all machine learning packages, including <strong>caret</strong>, <strong>h2o</strong>, and <strong>h2o4gpu</strong> (though we do offer the option to perform Platt scaling inside the <strong>h2o</strong> R package).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate predictions (type &quot;prob&quot; gives predicted values instead of predicted label)</span>
+pred_gbc &lt;-<span class="st"> </span>model_gbc <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x_test, <span class="dt">type =</span> <span class="st">&quot;prob&quot;</span>)
+pred_rfc &lt;-<span class="st"> </span>model_rfc <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x_test, <span class="dt">type =</span> <span class="st">&quot;prob&quot;</span>)
+pred_enc &lt;-<span class="st"> </span>model_enc <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x_test, <span class="dt">type =</span> <span class="st">&quot;prob&quot;</span>)</code></pre></div>
+<p>Let’s take a look at what the output of the <code>predict()</code> function looks like in binary classification. It will be a two-column matrix with the column names set to the names of the classes.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(pred_rfc)</code></pre></div>
+<p>To compute AUC of a binary classification model, we use the predicted values of the second column (the “positive” class) and pass that to the <code>Metrics::auc()</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compare test set performance using AUC</span>
+<span class="kw">auc</span>(<span class="dt">actual =</span> y_test, <span class="dt">predicted =</span> pred_gbc[, <span class="dv">2</span>])
+<span class="kw">auc</span>(<span class="dt">actual =</span> y_test, <span class="dt">predicted =</span> pred_rfc[, <span class="dv">2</span>])
+<span class="kw">auc</span>(<span class="dt">actual =</span> y_test, <span class="dt">predicted =</span> pred_enc[, <span class="dv">2</span>])</code></pre></div>
+</div>
+<div id="multiclass-classification" class="section level3">
+<h3>Multiclass Classification</h3>
+<p>Now that we are familiar with binary classification, there is not much more to say about multiclass classification. The predict output will have the same format as binary classification, except that if you use <code>type = &quot;prob&quot;</code> number of columns will match the number of classes. Often in multiclass classification, you may be interested in the predicted class label and misclassification error, which we’ve demonstrated already in the Quickstart section.</p>
+</div>
+<div id="regression" class="section level3">
+<h3>Regression</h3>
+<p>In this next exercise, we will compare a GBM and GLM regression model. Until <a href="https://github.com/h2oai/h2o4gpu/issues/493">this issue</a> is respolved, we don’t recommend that you use the Random Forest regressor, as there are some bugs that are severely affecting model performance.</p>
+<p>We will predicting the age of abalone from physical measurements, using the <a href="https://archive.ics.uci.edu/ml/datasets/Abalone">Abalone</a> dataset.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load a sample dataset for regression</span>
+<span class="co"># Source: https://archive.ics.uci.edu/ml/datasets/Abalone</span>
+df &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data&quot;</span>, <span class="dt">header =</span> <span class="ot">FALSE</span>)
+<span class="kw">str</span>(df)</code></pre></div>
+<p>There is one categorical/factor column in this dataset, so we will first convert those values to integers (label encoding). Recall that label encoding is just one way of encoding the categorical column and that there may be other ways that produce better results in terms of model performance.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">df[, <span class="dv">1</span>] &lt;-<span class="st"> </span><span class="kw">as.integer</span>(df[, <span class="dv">1</span>])  <span class="co">#label encode the one factor column</span></code></pre></div>
+<p>In this case, we started with a single data frame, so we should break the data into train and test splits at random. We can do that easily in R by sampling 80% of the row indices and subsetting the data frame by row.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Randomly sample 80% of the rows for the training set</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+train_idx &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(df), <span class="fl">0.8</span><span class="op">*</span><span class="kw">nrow</span>(df))
+
+<span class="co"># Create train &amp; test sets (column 9 is the response)</span>
+x_train &lt;-<span class="st"> </span>df[train_idx, <span class="op">-</span><span class="dv">9</span>]
+y_train &lt;-<span class="st"> </span>df[train_idx, <span class="dv">9</span>]
+x_test &lt;-<span class="st"> </span>df[<span class="op">-</span>train_idx, <span class="op">-</span><span class="dv">9</span>]
+y_test &lt;-<span class="st"> </span>df[<span class="op">-</span>train_idx, <span class="dv">9</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Train two different regression models</span>
+model_gbr &lt;-<span class="st"> </span><span class="kw">h2o4gpu.gradient_boosting_regressor</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x_train, y_train)
+model_enr &lt;-<span class="st"> </span><span class="kw">h2o4gpu.elastic_net_regressor</span>() <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(x_train, y_train)
+
+<span class="co"># Generate predictions </span>
+pred_gbr &lt;-<span class="st"> </span>model_gbr <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x_test)
+pred_enr &lt;-<span class="st"> </span>model_enr <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">predict</span>(x_test)</code></pre></div>
+<p>In regression, the <code>predict()</code> function always returns a vector of predictions (not a data frame).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(pred_gbr)</code></pre></div>
+<p>In regression problems, Mean Squared Error (MSE), is a common metric for model evaluation. We will use test set MSE to evaluate and compare our two models.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Compare test set performance using MSE</span>
+<span class="kw">mse</span>(<span class="dt">actual =</span> y_test, <span class="dt">predicted =</span> pred_gbr)
+<span class="kw">mse</span>(<span class="dt">actual =</span> y_test, <span class="dt">predicted =</span> pred_enr)</code></pre></div>
+<p>In this case, which is not usual, the GBM drastically outperforms the GLM.</p>
+</div>
+</div>
+<div id="unsupervised-learning" class="section level2">
+<h2>Unsupervised Learning</h2>
+<p>The unsupervised learning algorithms in <strong>h2o4gpu</strong> include K-Means, Principal Component Analysis (PCA), and Truncated Singular Value Decompostion (SVD).</p>
+<div id="k-means-clustering" class="section level3">
+<h3>K-Means Clustering</h3>
+<p>First we will train a K-Means model. Let’s create a train and test set from the iris dataset.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Prepare data</span>
+iris<span class="op">$</span>Species &lt;-<span class="st"> </span><span class="kw">as.integer</span>(iris<span class="op">$</span>Species) <span class="co"># convert to numeric data</span>
+
+<span class="co"># Randomly sample 80% of the rows for the training set</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+train_idx &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(iris), <span class="fl">0.8</span><span class="op">*</span><span class="kw">nrow</span>(iris)) 
+train &lt;-<span class="st"> </span>iris[train_idx, ]
+test &lt;-<span class="st"> </span>iris[<span class="op">-</span>train_idx, ]</code></pre></div>
+<p>Train a K-Means model with three clusters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model_km &lt;-<span class="st"> </span><span class="kw">h2o4gpu.kmeans</span>(<span class="dt">n_clusters =</span> 3L) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(train)</code></pre></div>
+<p>Once you have trained a K-Means model, applying the <code>transform()</code> function to a dataset transforms your points into distances from each centroid. So your <code>n</code>x<code>p</code> matrix becomes <code>n</code>x<code>k</code> (<code>n</code> is the number of observations,<code>p</code> the number of features and <code>k</code> the number of clusters).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">test_dist &lt;-<span class="st"> </span>model_km <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">transform</span>(test)
+<span class="kw">head</span>(test_dist)</code></pre></div>
+</div>
+<div id="principal-compoment-analysis-pca" class="section level3">
+<h3>Principal Compoment Analysis (PCA)</h3>
+<p>Let’s use the HIGGS train and test datasets again for demonstration.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load a sample dataset for binary classification</span>
+<span class="co"># Source: https://archive.ics.uci.edu/ml/datasets/HIGGS</span>
+train &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://s3.amazonaws.com/erin-data/higgs/higgs_train_10k.csv&quot;</span>)
+test &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv&quot;</span>)</code></pre></div>
+<p>Train a PCA model with 4 components and apply the transformation onto a dataset. Once you have created a projection model from a dataset, you can apply that transformation to a new dataset (such as a test set) using the <code>transform()</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model_pca &lt;-<span class="st"> </span><span class="kw">h2o4gpu.pca</span>(<span class="dt">n_components =</span> <span class="dv">4</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(train)
+test_transformed &lt;-<span class="st"> </span>model_pca <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">transform</span>(test)</code></pre></div>
+</div>
+<div id="truncated-singular-value-decomposition-svd" class="section level3">
+<h3>Truncated Singular Value Decomposition (SVD)</h3>
+<p>Train a truncated SVD model with 4 components and apply the transformation on a test set.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model_tsvd &lt;-<span class="st"> </span><span class="kw">h2o4gpu.truncated_svd</span>(<span class="dt">n_components =</span> <span class="dv">4</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">fit</span>(train)
+test_transformed &lt;-<span class="st"> </span>model_tsvd <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">transform</span>(test)</code></pre></div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
